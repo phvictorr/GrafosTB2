@@ -1,0 +1,30 @@
+      """#Mapeando disciplinas - Preferência 1 (se houver)
+        print('Valor de próxima chave: ', proxima_chave)
+        for i in range(tamanho_professores):
+            if self.lista_professores[i][2] != None:
+                self.adiciona_dict(self.lista_professores[i][2], proxima_chave)
+                proxima_chave = proxima_chave+1
+        
+        #Mapeando disciplinas - Preferência 2 (se houver)
+        for i in range(tamanho_professores):
+            if self.lista_professores[i][3] != None:
+                self.adiciona_dict(self.lista_professores[i][3], proxima_chave)
+                proxima_chave = proxima_chave+1
+        
+        #Mapeando disciplinas - Preferência 3 (se houver)
+        for i in range(tamanho_professores):
+            if self.lista_professores[i][4] != None:
+                self.adiciona_dict(self.lista_professores[i][4], proxima_chave)
+                proxima_chave = proxima_chave+1    
+        
+        #Mapeando disciplinas - Preferência 4 (se houver)
+        for i in range(tamanho_professores):
+            if self.lista_professores[i][5] != None:
+                self.adiciona_dict(self.lista_professores[i][5], proxima_chave)
+                proxima_chave = proxima_chave+1    
+        
+        #Mapeando disciplinas - Preferência 5 (se houver)
+        for i in range(tamanho_professores):
+            if self.lista_professores[i][6] != None:
+                self.adiciona_dict(self.lista_professores[i][6], proxima_chave)
+                proxima_chave = proxima_chave+1  """
