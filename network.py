@@ -1,33 +1,49 @@
 from csv import reader
 from operator import index
+from tkinter import W
 
-from numpy import double
+from numpy import double, ubyte
 
 class Network:
-    def __init__(self, num_vert=0, num_arestas=0, mat_adj=None, size_v=None, capacidade=None):
+    def __init__(self, num_vert=0, num_arestas=0, mat_adj=None, lista_adj=None, mat_capacidade=None, mat_c=None,demanda=None):
         self.num_vert = num_vert
         self.num_arestas = num_arestas
         self.lista_professores = []
         self.lista_disciplinas = []
-        self.demanda = []
         self.dict = {}
             
         if mat_adj is None:
-            self.mat_adj = [[0 for j in range(num_vert)] for i in range(num_vert)]
+            self.mat_adj = [[0 for i in range(num_vert)] for j in range(num_vert)]
         else:
             self.mat_adj = mat_adj
             
-        if capacidade is None:
-            self.capacidade = [[0 for j in range(num_vert)] for i in range(num_vert)]
-    
-    def add_aresta(self, u, v, c, w=1):
-        """Adiciona aresta de u a v com peso w"""
-        if u < self.num_vert and v < self.num_vert:
-            self.num_arestas.append((u,v,w,c))
-            self.mat_adj[u][v] = w
-            self.capacidade[u][v] = c
+        if mat_capacidade is None:
+            self.mat_capacidade = [[0 for i in range(num_vert)] for j in range(num_vert)]
         else:
-            print("Aresta invalida!")
+            self.mat_capacidade = mat_capacidade
+        
+        if mat_c is None:
+            self.mat_c = [[0 for i in range(num_vert)] for j in range(num_vert)]
+        else:
+            self.mat_c = mat_c
+            
+        if lista_adj is None:
+            self.list_adj = [[] for i in range(num_vert)]
+        else:
+            self.list_adj = lista_adj
+        
+        if demanda is None:
+            self.demanda = [[] for i in range(num_vert)]
+        else:
+            self.demanda = demanda
+    
+    def add_aresta(self, u, v, w, c):
+        self.mat_adj[u][v] = [w, c]
+        self.mat_capacidade[u][v] = c
+        self.mat_c[u][v] = w
+        self.list_adj[u].append((u,w,c))
+        self.demanda.append((u, v, w))
+        self.num_arestas += 1
 
     def remove_aresta(self, u, v):
         """Remove aresta de u a v, se houver"""
@@ -43,7 +59,7 @@ class Network:
                 print("Aresta inexistente!")
         else:
             print("Aresta invalida!")
-
+    
     #Lendo arquivo professores com biblioteca "csv/reader"
     def ler_arquivo_professores(self, nome_arq):
         try:
@@ -68,14 +84,15 @@ class Network:
             print("Nao foi possivel encontrar ou ler o arquivo!")
             return False  
 
-
     def adiciona_dict(self, valor, chave):
         self.dict[valor] = chave
     
     def criar_rede(self):
         tamanho_professores = len(self.lista_professores) #Guarda tamanho da lista de professores
         tamanho_disciplinas = len(self.lista_disciplinas) #Guarda tamanho da lista de disciplinas
-        proxima_chave = 0
+        proxima_chave = 1
+        
+         # ------------------------------------------------------------------------#
         
         #Mapeando nome dos professores
         for i in range(tamanho_professores):
@@ -84,23 +101,74 @@ class Network:
         
         #Envia proxima_chave com valor de i
         
-        #Mapeando cursos
+        #Mapeando cursos e disciplinas
         for i in range(tamanho_disciplinas):
             if self.lista_disciplinas[i][0] != None:
                 self.adiciona_dict(self.lista_disciplinas[i][0], proxima_chave)
-                proxima_chave = proxima_chave+1
-        
-        #Mapeando disciplinas dos cursos
-        for i in range(tamanho_disciplinas):
-            if self.lista_disciplinas[i][1] != None:
                 self.adiciona_dict(self.lista_disciplinas[i][1], proxima_chave)
                 proxima_chave = proxima_chave+1
         
-        print('Dicionário: ', self.dict)
+        print('\nDicionário: ', self.dict)
+        
+        #Capturando o tamanho de vértices em relação ao dicionário
+        self.num_vert = len(self.dict)
+        
+        #Preenchendo matrizes
+        self.mat_adj = [[0 for i in range((tamanho_disciplinas+tamanho_professores)+2)] for j in range((tamanho_disciplinas+tamanho_professores)+2)]
+        self.mat_c = [[0 for i in range((tamanho_disciplinas+tamanho_professores)+2)] for j in range((tamanho_disciplinas+tamanho_professores)+2)]
+        self.mat_capacidade = [[0 for i in range((tamanho_disciplinas+tamanho_professores)+2)] for j in range((tamanho_disciplinas+tamanho_professores)+2)]
+        self.list_adj = [0 for i in range((tamanho_disciplinas+tamanho_professores)+2)]
+        
+        # ------------------------------------------------------------------------#
+        
+        #Somatório número de turmas
+        contador_turmas = 0
+        for i in range(tamanho_disciplinas):
+            contador_turmas = contador_turmas + int(self.lista_disciplinas[i][2])
+        
+        #print(self.dict[self.lista_disciplinas[1][1]])
+        
+        #Super oferta -> GF e BM
+        for i in range((tamanho_professores)-1):
+            self.add_aresta(0, self.dict[self.lista_professores[i][0]], self.lista_professores[i][1], self.lista_professores[i][1])
+            
+        #Professores até disciplinas (por ordem de preferência)
+        
+        # for i in range((tamanho_disciplinas)-1):
+        #     contador = 2
+        #     for j in range(5):
+        #         match contador:
+        #             case 2: #1
+        #                 self.add_aresta(self.dict[self.lista_professores[i][0]], self.dict[self.lista_disciplinas[i][0]], 0, 'inf')
+        #             case 3: #2
+        #                 self.add_aresta(self.dict[self.lista_professores[i][0]], self.dict[self.lista_disciplinas[i][0]], 3, 'inf')
+        #             case 4: #3
+        #                 self.add_aresta(self.dict[self.lista_professores[i][0]], self.dict[self.lista_disciplinas[i][0]], 5, 'inf')
+        #             case 5: #4
+        #                 self.add_aresta(self.dict[self.lista_professores[i][0]], self.dict[self.lista_disciplinas[i][0]], 8, 'inf')
+        #             case 6: #5
+        #                 self.add_aresta(self.dict[self.lista_professores[i][0]], self.dict[self.lista_disciplinas[i][0]], 10, 'inf')
+        #         contador += 1
+            
+        # for i in range((tamanho_disciplinas)-1):
+        #     self.add_aresta(self.dict[self.lista_professores[i][0]], self.dict[self.lista_disciplinas[i][0]], 0, 'inf')
+        
+        #Disciplinas até Super-demanda
+        
+        # for i in range((tamanho_disciplinas)-1):
+        #     self.add_aresta(self.dict[self.lista_disciplinas[i][0]], 3, self.lista_disciplinas[i][2], self.lista_disciplinas[i][2])
+        
+        print("Matriz de adjacências: \n\n--------------------")    
+        for i in range(len(self.mat_adj)):
+            for j in range(len(self.mat_adj[i])):
+                print(self.mat_adj[i][j], end=" ")
+            print("\n")
+        print("--------------------\n")
+        #print(self.mat_adj)
     
     def bellman_ford(self, s, t):
-        dist = [float("inf") for _ in range(self.size_v)]  # Distance from s
-        pred = [None for _ in range(self.size_v)]  # Predecessor in shortest path from s
+        dist = [float("inf") for _ in range(self.size_v)]
+        pred = [None for _ in range(self.size_v)]
         dist[s] = 0
         for it in range(self.size_v):
             updated = False
