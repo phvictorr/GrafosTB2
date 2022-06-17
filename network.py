@@ -134,29 +134,29 @@ class Network:
             
         #Professores até disciplinas (por ordem de preferência)
         
-        # for i in range((tamanho_disciplinas)-1):
-        #     contador = 2
-        #     for j in range(5):
-        #         match contador:
-        #             case 2: #1
-        #                 self.add_aresta(self.dict[self.lista_professores[i][0]], self.dict[self.lista_disciplinas[i][0]], 0, 'inf')
-        #             case 3: #2
-        #                 self.add_aresta(self.dict[self.lista_professores[i][0]], self.dict[self.lista_disciplinas[i][0]], 3, 'inf')
-        #             case 4: #3
-        #                 self.add_aresta(self.dict[self.lista_professores[i][0]], self.dict[self.lista_disciplinas[i][0]], 5, 'inf')
-        #             case 5: #4
-        #                 self.add_aresta(self.dict[self.lista_professores[i][0]], self.dict[self.lista_disciplinas[i][0]], 8, 'inf')
-        #             case 6: #5
-        #                 self.add_aresta(self.dict[self.lista_professores[i][0]], self.dict[self.lista_disciplinas[i][0]], 10, 'inf')
-        #         contador += 1
+        for i in range((tamanho_disciplinas)-1):
+            contador = 2
+            for j in range(5):
+                match contador:
+                    case 2: #1
+                        self.add_aresta(self.dict[self.lista_professores[i][0]], self.dict[self.lista_disciplinas[i][0]], 0, 'inf')
+                    case 3: #2
+                        self.add_aresta(self.dict[self.lista_professores[i][0]], self.dict[self.lista_disciplinas[i][0]], 3, 'inf')
+                    case 4: #3
+                        self.add_aresta(self.dict[self.lista_professores[i][0]], self.dict[self.lista_disciplinas[i][0]], 5, 'inf')
+                    case 5: #4
+                        self.add_aresta(self.dict[self.lista_professores[i][0]], self.dict[self.lista_disciplinas[i][0]], 8, 'inf')
+                    case 6: #5
+                        self.add_aresta(self.dict[self.lista_professores[i][0]], self.dict[self.lista_disciplinas[i][0]], 10, 'inf')
+                contador += 1
             
         # for i in range((tamanho_disciplinas)-1):
         #     self.add_aresta(self.dict[self.lista_professores[i][0]], self.dict[self.lista_disciplinas[i][0]], 0, 'inf')
         
         #Disciplinas até Super-demanda
         
-        # for i in range((tamanho_disciplinas)-1):
-        #     self.add_aresta(self.dict[self.lista_disciplinas[i][0]], 3, self.lista_disciplinas[i][2], self.lista_disciplinas[i][2])
+        for i in range((tamanho_disciplinas)-1):
+            self.add_aresta(self.dict[self.lista_disciplinas[i][0]], 3, self.lista_disciplinas[i][2], self.lista_disciplinas[i][2])
         
         print("Matriz de adjacências: \n\n--------------------")    
         for i in range(len(self.mat_adj)):
@@ -167,12 +167,12 @@ class Network:
         #print(self.mat_adj)
     
     def bellman_ford(self, s, t):
-        dist = [float("inf") for _ in range(self.size_v)]
-        pred = [None for _ in range(self.size_v)]
+        dist = [float("inf") for _ in range(self.num_vert)]
+        pred = [None for _ in range(self.num_vert)]
         dist[s] = 0
-        for it in range(self.size_v):
+        for it in range(self.num_vert):
             updated = False
-            for (u, v, w) in self.edge_list:
+            for (u, v, w) in self.mat_adj:
                 if dist[v] > dist[u] + w:
                     dist[v] = dist[u] + w
                     pred[v] = u
@@ -184,7 +184,7 @@ class Network:
     
     def executar_scm(self, w, c, b, s, t):
         F = [[0 for i in range(len(G))] for i in range(leng(G))]
-        C = bellman_ford(self, s, t)
+        C = self.bellman_ford(self, s, t)
         while len(C) != 0 and b[s] != 0:
             f = float('inf')
             for i in range(1, len(C)):
@@ -202,9 +202,9 @@ class Network:
                 b[t] += f
                 if c[u][v] == 0:
                     G[u][v] = 0
-                    E.remove((u,v,w[u][v]))
-                if G[v][u] == 0:
-                    G[v][u] = 1
-                    E.append((v,u,-w[u][v]))
+                    self.remove_aresta((u,v,w[u][v]))
+                if self[v][u] == 0:
+                    self[v][u] = 1
+                    self.mat_adj.append((v,u,-w[u][v]))
                     w[v][u] = -w[u][v]
-            C = bellman_ford(self, s, t)
+            C = self.bellman_ford(self, s, t)
