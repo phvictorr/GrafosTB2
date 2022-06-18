@@ -41,9 +41,6 @@ class Network:
         self.mat_adj[u][v] = [w, c]
         self.mat_capacidade[u][v] = c
         self.mat_c[u][v] = w
-        self.list_adj[u].append((u,w,c))
-        self.demanda.append((u, v, w))
-        self.num_arestas += 1
 
     def remove_aresta(self, u, v):
         """Remove aresta de u a v, se houver"""
@@ -117,7 +114,6 @@ class Network:
         self.mat_adj = [[0 for i in range((tamanho_disciplinas+tamanho_professores)+2)] for j in range((tamanho_disciplinas+tamanho_professores)+2)]
         self.mat_c = [[0 for i in range((tamanho_disciplinas+tamanho_professores)+2)] for j in range((tamanho_disciplinas+tamanho_professores)+2)]
         self.mat_capacidade = [[0 for i in range((tamanho_disciplinas+tamanho_professores)+2)] for j in range((tamanho_disciplinas+tamanho_professores)+2)]
-        self.list_adj = [0 for i in range((tamanho_disciplinas+tamanho_professores)+2)]
         
         # ------------------------------------------------------------------------#
         
@@ -139,15 +135,15 @@ class Network:
             for j in range(5):
                 match contador:
                     case 2: #1
-                        self.add_aresta(self.dict[self.lista_professores[i][0]], self.dict[self.lista_disciplinas[i][0]], 0, 'inf')
+                        self.add_aresta(self.dict[self.lista_professores[i][0]], self.dict[self.lista_disciplinas[i][contador]], 0, 'inf')
                     case 3: #2
-                        self.add_aresta(self.dict[self.lista_professores[i][0]], self.dict[self.lista_disciplinas[i][0]], 3, 'inf')
+                        self.add_aresta(self.dict[self.lista_professores[i][0]], self.dict[self.lista_disciplinas[i][contador]], 3, 'inf')
                     case 4: #3
-                        self.add_aresta(self.dict[self.lista_professores[i][0]], self.dict[self.lista_disciplinas[i][0]], 5, 'inf')
+                        self.add_aresta(self.dict[self.lista_professores[i][0]], self.dict[self.lista_disciplinas[i][contador]], 5, 'inf')
                     case 5: #4
-                        self.add_aresta(self.dict[self.lista_professores[i][0]], self.dict[self.lista_disciplinas[i][0]], 8, 'inf')
+                        self.add_aresta(self.dict[self.lista_professores[i][0]], self.dict[self.lista_disciplinas[i][contador]], 8, 'inf')
                     case 6: #5
-                        self.add_aresta(self.dict[self.lista_professores[i][0]], self.dict[self.lista_disciplinas[i][0]], 10, 'inf')
+                        self.add_aresta(self.dict[self.lista_professores[i][0]], self.dict[self.lista_disciplinas[i][contador]], 10, 'inf')
                 contador += 1
             
         # for i in range((tamanho_disciplinas)-1):
@@ -165,6 +161,9 @@ class Network:
             print("\n")
         print("--------------------\n")
         #print(self.mat_adj)
+        
+        self.bellman_ford(self, 0, 5)
+        self.executar_scm(self, self.mat_capacidade, self.list_adj, 0, 5)
     
     def bellman_ford(self, s, t):
         dist = [float("inf") for _ in range(self.num_vert)]
@@ -183,7 +182,7 @@ class Network:
 
     
     def executar_scm(self, w, c, b, s, t):
-        F = [[0 for i in range(len(G))] for i in range(leng(G))]
+        F = [[0 for i in range(len(self))] for i in range(len(self))]
         C = self.bellman_ford(self, s, t)
         while len(C) != 0 and b[s] != 0:
             f = float('inf')
